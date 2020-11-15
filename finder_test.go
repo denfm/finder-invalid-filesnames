@@ -66,7 +66,7 @@ func TestScanPath(t *testing.T) {
 	}
 	var buffer []*csvRow
 
-	err = ScanPath(path+"/test_files/", stats, buffer)
+	err = ScanPath(path+"/test_files/", stats, &buffer)
 	assert.NoError(t, err)
 
 	assert.Equal(t, stats.dirs.total, 2)

@@ -53,11 +53,11 @@ var ValidCodes = [5]int32{
 
 // https://www.tamasoft.co.jp/en/general-info/unicode-decimal.html
 func main() {
-	flag.Parse()
-
-	parsePath = *flag.String("parse-path", "", "The directory to be scanned recursively")
-	outputCsvPath = *flag.String("output-csv-path", "/tmp/finder-invalid-filenames.csv",
+	flag.StringVar(&parsePath, "parse-path", "", "The directory to be scanned recursively")
+	flag.StringVar(&outputCsvPath, "output-csv-path", "/tmp/finder-invalid-filenames.csv",
 		"The path to the csv file for the result")
+
+	flag.Parse()
 
 	if parsePath == "" {
 		log.Fatal("Please specify path for recursive scanning")
@@ -69,7 +69,7 @@ func main() {
 	}
 	buffer := []*csvRow{{"FILE", "INVALID", "WARNING", "IS_DIR"}}
 
-	err := ScanPath(parsePath, stats, buffer)
+	err := ScanPath(parsePath, stats, &buffer)
 
 	if err != nil {
 		log.Fatal(err)
@@ -118,7 +118,7 @@ func SaveCsv(path string, buffer []*csvRow) error {
 	return nil
 }
 
-func ScanPath(path string, stats *stats, buffer []*csvRow) error {
+func ScanPath(path string, stats *stats, buffer *[]*csvRow) error {
 	return filepath.Walk(path, func(file string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return nil
@@ -147,7 +147,7 @@ func ScanPath(path string, stats *stats, buffer []*csvRow) error {
 		}
 
 		if !isValid || isWarning {
-			buffer = append(buffer, &csvRow{
+			*buffer = append(*buffer, &csvRow{
 				strings.TrimLeft(strings.TrimPrefix(file, parsePath), "/"),
 				strconv.FormatBool(!isValid),
 				strconv.FormatBool(isWarning),
